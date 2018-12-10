@@ -11,10 +11,11 @@ SolarSystemWidget::SolarSystemWidget(QWidget *parent)
   _image("./Textures/2k_sun.jpg"),
   earth_image("./Textures/earth.ppm")
 	{ // constructor
-    sphere1Angle = 0;
+    sunAngle = 0;
+    sphereAngles[0] = 0;
     sphere1Moon1Angle = 0;
-    sphere2Angle = -30;
-    sphere3Angle = 0;
+    sphereAngles[1] = -30;
+    sphereAngles[2] = 0;
 
     // Scene angles (x,y,z)
     sceneAngle[0] = 0;
@@ -90,9 +91,7 @@ void SolarSystemWidget::paintGL()
 
   // ***** Central sphere ("sun") *****
   glPushMatrix();
-  // glLoadIdentity();
-    // // Initialise a quadric
-    // sphere = gluNewQuadric();
+    glRotatef(this->sunAngle, 0, 1, 0);
     gluQuadricDrawStyle(sphere, GLU_FILL);
     gluQuadricTexture(sphere, GL_TRUE);
     gluSphere(sphere,1.5,20,20);
@@ -103,7 +102,7 @@ void SolarSystemWidget::paintGL()
   // ***** Sphere 1 *****
   glPushMatrix();
 
-    glRotatef(this->sphere1Angle, 0, 1, 0);
+    glRotatef(this->sphereAngles[0], 0, 1, 0);
     glTranslatef(3,0,0);
     setMaterial(&emeraldMaterials);
     glutSolidSphere(1, 50, 50);
@@ -123,7 +122,7 @@ void SolarSystemWidget::paintGL()
   // still orbits around the origin (sun). The cross operator is used.
   glPushMatrix();
 
-    glRotatef(this->sphere2Angle, 1, 4, 0);
+    glRotatef(this->sphereAngles[1], 1, 4, 0);
     glTranslatef(-6,1.5,0);
     setMaterial(&rubyMaterials);
     glutSolidSphere(0.7, 25, 25);
@@ -133,7 +132,7 @@ void SolarSystemWidget::paintGL()
   // ***** Sphere 3 *****
   glPushMatrix();
 
-    glRotatef(this->sphere3Angle, 0, 1, 0);
+    glRotatef(this->sphereAngles[2], 0, 1, 0);
     glTranslatef(10,0,0);
     setMaterial(&whiteShinyMaterials);
     glutSolidSphere(1, 12, 12);
@@ -166,9 +165,10 @@ void SolarSystemWidget::setzAngle(int newAngle)  {
 }
 
 void SolarSystemWidget::incrementAngle()  {
-  this->sphere1Angle = sphere1Angle + 1;
+  this->sunAngle = sunAngle + 0.25;
+  this->sphereAngles[0] = sphereAngles[0] + 1;
   this->sphere1Moon1Angle = sphere1Moon1Angle - 2;
-  this->sphere2Angle = sphere2Angle + 2;
-  this->sphere3Angle = sphere3Angle + 3;
+  this->sphereAngles[1] = sphereAngles[1] + 2;
+  this->sphereAngles[2] = sphereAngles[2] + 3;
   this->update();
 }

@@ -14,6 +14,12 @@ typedef struct materialStruct {
   GLfloat shininess;
 } materialStruct;
 
+// Setting up the definition of a planet
+typedef struct planetStruct {
+  float angle;
+  int moons;
+  float moonAngles[];
+} planetBody;
 
 static materialStruct brassMaterials = {
   { 0.33, 0.22, 0.03, 1.0},
@@ -71,10 +77,9 @@ class SolarSystemWidget: public QGLWidget
 	void fillimage();
   float sceneAngle[3];
 
-  float sphere1Angle;
+  float sunAngle;
+  float sphereAngles[3];
   float sphere1Moon1Angle;
-  float sphere2Angle;
-  float sphere3Angle;
 
   GLUquadric* sphere;
   Image _image;
