@@ -1,0 +1,5 @@
+Makefile
+SolarSystem
+SolarSystemv2
+*.o
+moc_*.cpp
