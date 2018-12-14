@@ -8,7 +8,7 @@
 // constructor
 SolarSystemWidget::SolarSystemWidget(QWidget *parent)
 	: QGLWidget(parent),
-  _image("./Textures/2k_sun.jpg"),
+  sun_image("./Textures/2k_sun.jpg"),
   earth_image("./Textures/earth.ppm")
 	{ // constructor
     sunAngle = 0;
@@ -31,7 +31,7 @@ void SolarSystemWidget::initializeGL()
 	glClearColor(0.3, 0.3, 0.3, 0.0);
 
   // Initialise a quadric
-  sphere = gluNewQuadric();
+  sun = gluNewQuadric();
   earth = gluNewQuadric();
 	} // initializeGL()
 
@@ -51,7 +51,23 @@ void SolarSystemWidget::resizeGL(int w, int h)
 	GLfloat light_pos[] = {0., 0., 0., 1.};
 	glLightfv(GL_LIGHT0, GL_POSITION, light_pos);
 
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _image.Width(), _image.Height(), 0, GL_RGB, GL_UNSIGNED_BYTE, _image.imageField());
+  // Textures
+  GLuint textures[2];
+  glGenTextures(2, textures);
+
+  // Sun texture
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, textures[0]);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, sun_image.Width(), sun_image.Height(), 0, GL_RGB, GL_UNSIGNED_BYTE, sun_image.imageField());
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+  // Earth texture
+  glActiveTexture(GL_TEXTURE1);
+  glBindTexture(GL_TEXTURE_2D, textures[1]);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, earth_image.Width(), earth_image.Height(), 0, GL_RGB, GL_UNSIGNED_BYTE, earth_image.imageField());
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -60,7 +76,12 @@ void SolarSystemWidget::resizeGL(int w, int h)
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(-16.0, 16.0, -16.0, 16.0, -16.0, 16.0);
-  gluLookAt(1.,1.,1., 0.0,0.0,0.0, 0.0,1.0,0.0);
+  gluLookAt(1.0,1.0,1.0, 0.0,0.0,0.0, 0.0,1.0,0.0);
+
+  // glMatrixMode(GL_MODELVIEW);
+  // glLoadIdentity();
+  // gluLookAt(0.0,0.0,0.0, 0.0,0.0,0.0, 0.0,1.0,0.0);
+
 
 	} // resizeGL()
 
@@ -92,9 +113,12 @@ void SolarSystemWidget::paintGL()
   // ***** Central sphere ("sun") *****
   glPushMatrix();
     glRotatef(this->sunAngle, 0, 1, 0);
-    gluQuadricDrawStyle(sphere, GLU_FILL);
-    gluQuadricTexture(sphere, GL_TRUE);
-    gluSphere(sphere,1.5,20,20);
+
+    // Have a light specifically for this object???
+    glActiveTexture(GL_TEXTURE0);
+    gluQuadricDrawStyle(sun, GLU_FILL);
+    gluQuadricTexture(sun, GL_TRUE);
+    gluSphere(sun,1.5,20,20);
 
     // glutSolidSphere(1.5, 50, 50);
   glPopMatrix();
@@ -104,8 +128,13 @@ void SolarSystemWidget::paintGL()
 
     glRotatef(this->sphereAngles[0], 0, 1, 0);
     glTranslatef(3,0,0);
-    setMaterial(&emeraldMaterials);
-    glutSolidSphere(1, 50, 50);
+
+    glActiveTexture(GL_TEXTURE1);
+    gluQuadricDrawStyle(earth, GLU_FILL);
+    gluQuadricTexture(earth, GL_TRUE);
+    gluSphere(earth,1,20,20);
+
+    // glutSolidSphere(1, 50, 50);
 
     // ***** "Moon" of sphere 1
     glRotatef(this->sphere1Moon1Angle, 0, 1, 0);

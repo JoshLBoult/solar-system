@@ -81,8 +81,8 @@ class SolarSystemWidget: public QGLWidget
   float sphereAngles[3];
   float sphere1Moon1Angle;
 
-  GLUquadric* sphere;
-  Image _image;
+  GLUquadric* sun;
+  Image sun_image;
   QImage* p_qimage;
 
   // Earth-like object
