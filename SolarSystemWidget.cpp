@@ -3,6 +3,7 @@
 #include <QGLWidget>
 #include <QTimer>
 #include "SolarSystemWidget.h"
+#include <iostream>
 
 
 // constructor
@@ -27,12 +28,41 @@ SolarSystemWidget::SolarSystemWidget(QWidget *parent)
 // called when OpenGL context is set up
 void SolarSystemWidget::initializeGL()
 	{ // initializeGL()
-	// set the widget background colour
-	glClearColor(0.3, 0.3, 0.3, 0.0);
 
   // Initialise a quadric
-  sun = gluNewQuadric();
-  earth = gluNewQuadric();
+  this->sun = gluNewQuadric();
+  this->earth = gluNewQuadric();
+
+  // Textures
+  glGenTextures(5, this->textures);
+
+  // set the widget background
+	glClearColor(0.3, 0.3, 0.3, 0.0);
+  glActiveTexture(GL_TEXTURE0);
+  glEnable(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D, this->textures[0]);
+
+  // Sun texture
+  glActiveTexture(GL_TEXTURE1);
+  glEnable(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D, this->textures[1]);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, sun_image.Width(), sun_image.Height(), 0, GL_RGB, GL_UNSIGNED_BYTE, sun_image.imageField());
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+  // Earth texture
+  glActiveTexture(GL_TEXTURE2);
+  glEnable(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D, this->textures[2]);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, earth_image.Width(), earth_image.Height(), 0, GL_RGB, GL_UNSIGNED_BYTE, earth_image.imageField());
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+  glActiveTexture(GL_TEXTURE0);
 	} // initializeGL()
 
 
@@ -50,28 +80,6 @@ void SolarSystemWidget::resizeGL(int w, int h)
 	glEnable(GL_LIGHT0);
 	GLfloat light_pos[] = {0., 0., 0., 1.};
 	glLightfv(GL_LIGHT0, GL_POSITION, light_pos);
-
-  // Textures
-  GLuint textures[2];
-  glGenTextures(2, textures);
-
-  // Sun texture
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, textures[0]);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, sun_image.Width(), sun_image.Height(), 0, GL_RGB, GL_UNSIGNED_BYTE, sun_image.imageField());
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-  // Earth texture
-  glActiveTexture(GL_TEXTURE1);
-  glBindTexture(GL_TEXTURE_2D, textures[1]);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, earth_image.Width(), earth_image.Height(), 0, GL_RGB, GL_UNSIGNED_BYTE, earth_image.imageField());
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -98,7 +106,6 @@ void SolarSystemWidget::paintGL()
 	{ // paintGL()
 	// clear the widget
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  glEnable(GL_TEXTURE_2D);
 
 	// You must set the matrix mode to model view directly before enabling the depth test
   glMatrixMode(GL_MODELVIEW);
@@ -114,11 +121,12 @@ void SolarSystemWidget::paintGL()
   glPushMatrix();
     glRotatef(this->sunAngle, 0, 1, 0);
 
-    // Have a light specifically for this object???
-    glActiveTexture(GL_TEXTURE0);
-    gluQuadricDrawStyle(sun, GLU_FILL);
-    gluQuadricTexture(sun, GL_TRUE);
-    gluSphere(sun,1.5,20,20);
+    glBindTexture(GL_TEXTURE_2D, this->textures[1]);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+    gluQuadricDrawStyle(this->sun, GLU_FILL);
+    gluQuadricTexture(this->sun, GL_TRUE);
+    gluSphere(this->sun,1.5,20,20);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
     // glutSolidSphere(1.5, 50, 50);
   glPopMatrix();
@@ -129,16 +137,17 @@ void SolarSystemWidget::paintGL()
     glRotatef(this->sphereAngles[0], 0, 1, 0);
     glTranslatef(3,0,0);
 
-    glActiveTexture(GL_TEXTURE1);
-    gluQuadricDrawStyle(earth, GLU_FILL);
-    gluQuadricTexture(earth, GL_TRUE);
-    gluSphere(earth,1,20,20);
+    glBindTexture(GL_TEXTURE_2D, this->textures[2]);
+    gluQuadricDrawStyle(this->earth, GLU_FILL);
+    gluQuadricTexture(this->earth, GL_TRUE);
+    gluSphere(this->earth,1,20,20);
 
     // glutSolidSphere(1, 50, 50);
 
     // ***** "Moon" of sphere 1
     glRotatef(this->sphere1Moon1Angle, 0, 1, 0);
     glTranslatef(1,0,-1);
+    glActiveTexture(GL_TEXTURE0);
     setMaterial(&brassMaterials);
     glutSolidSphere(0.2, 10, 10);
 

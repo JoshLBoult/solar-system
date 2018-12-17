@@ -83,12 +83,12 @@ class SolarSystemWidget: public QGLWidget
 
   GLUquadric* sun;
   Image sun_image;
-  QImage* p_qimage;
 
   // Earth-like object
   GLUquadric* earth;
   Image earth_image;
-  QImage* earth_p_qimage;
+
+  GLuint textures[5];
 
   public slots:
 
