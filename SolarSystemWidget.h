@@ -31,21 +31,21 @@ class SolarSystemWidget: public QGLWidget
 
   // Texture images
   Image back_image;
-  // Image sun_image;
-  // Image earth_image;
-  // Image moon_image;
-  // Image jupiter_image;
+  Image sun_image;
+  Image earth_image;
+  Image moon_image;
+  Image jupiter_image;
+  Image neptune_image;
 
   // Quadric spheres
   GLUquadric* sun;
-  Image sun_image;
   GLUquadric* earth;
-  Image earth_image;
-  // GLUquadric* moon;
-  // GLUquadric* jupiter;
+  GLUquadric* moon;
+  GLUquadric* jupiter;
+  GLUquadric* neptune;
 
   // Texture array
-  GLuint textures[5];
+  GLuint textures[6];
 
   public slots:
 

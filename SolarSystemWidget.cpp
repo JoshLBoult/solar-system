@@ -4,15 +4,18 @@
 #include <QTimer>
 #include "SolarSystemWidget.h"
 
+// Author = Josh Boult
+// This is NOT a truthful representation of our solar system
 
 // constructor
 SolarSystemWidget::SolarSystemWidget(QWidget *parent)
 	: QGLWidget(parent),
   back_image("./Textures/stars.jpeg"),
   sun_image("./Textures/2k_sun.jpg"),
-  earth_image("./Textures/earth.ppm")
-  // moon_image("./Textures/2k_moon.jpg"),
-  // jupiter_image("./Textures/2k_jupiter.jpg")
+  earth_image("./Textures/earth.ppm"),
+  moon_image("./Textures/2k_moon.jpg"),
+  jupiter_image("./Textures/2k_jupiter.jpg"),
+  neptune_image("./Textures/2k_neptune.jpg")
 	{ // constructor
     sunAngle = 0;
     sphereAngles[0] = 0;
@@ -34,11 +37,12 @@ void SolarSystemWidget::initializeGL()
   // Initialise quadrics
   this->sun = gluNewQuadric();
   this->earth = gluNewQuadric();
-  // this->moon = gluNewQuadric();
-  // this->jupiter = gluNewQuadric();
+  this->moon = gluNewQuadric();
+  this->jupiter = gluNewQuadric();
+  this->neptune = gluNewQuadric();
 
   // Textures
-  glGenTextures(5, this->textures);
+  glGenTextures(6, this->textures);
 
   // Background texture
   glActiveTexture(GL_TEXTURE0);
@@ -71,24 +75,34 @@ void SolarSystemWidget::initializeGL()
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
   // Moon texture
-  // glActiveTexture(GL_TEXTURE3);
-  // glEnable(GL_TEXTURE_2D);
-  // glBindTexture(GL_TEXTURE_2D, this->textures[3]);
-  // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, moon_image.Width(), moon_image.Height(), 0, GL_RGB, GL_UNSIGNED_BYTE, moon_image.imageField());
-  //   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-  //   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-  //   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  //   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  //
-  // // Jupiter texture
-  // glActiveTexture(GL_TEXTURE4);
-  // glEnable(GL_TEXTURE_2D);
-  // glBindTexture(GL_TEXTURE_2D, this->textures[4]);
-  // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, jupiter_image.Width(), jupiter_image.Height(), 0, GL_RGB, GL_UNSIGNED_BYTE, jupiter_image.imageField());
-  //   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-  //   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-  //   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  //   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glActiveTexture(GL_TEXTURE3);
+  glEnable(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D, this->textures[3]);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, moon_image.Width(), moon_image.Height(), 0, GL_RGB, GL_UNSIGNED_BYTE, moon_image.imageField());
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+  // Jupiter texture
+  glActiveTexture(GL_TEXTURE4);
+  glEnable(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D, this->textures[4]);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, jupiter_image.Width(), jupiter_image.Height(), 0, GL_RGB, GL_UNSIGNED_BYTE, jupiter_image.imageField());
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+  // Neptune texture
+  glActiveTexture(GL_TEXTURE5);
+  glEnable(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D, this->textures[5]);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, neptune_image.Width(), neptune_image.Height(), 0, GL_RGB, GL_UNSIGNED_BYTE, neptune_image.imageField());
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	} // initializeGL()
 
 
@@ -174,7 +188,9 @@ void SolarSystemWidget::paintGL()
       glTranslatef(3,0,0);
 
       glBindTexture(GL_TEXTURE_2D, this->textures[2]);
-      glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+      // Use GL_ADD to make the scene brighter, if somewhat less realistic
+      glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ADD);
       gluQuadricDrawStyle(this->earth, GLU_FILL);
       gluQuadricTexture(this->earth, GL_TRUE);
       gluSphere(this->earth,1,20,20);
@@ -182,11 +198,11 @@ void SolarSystemWidget::paintGL()
       // ***** "Moon" of sphere 1 *****
       glRotatef(this->sphere1Moon1Angle, 0, 1, 0);
       glTranslatef(1,0,-1);
-      glActiveTexture(GL_TEXTURE0);
-      // // glBindTexture(GL_TEXTURE_2D, this->textures[3]);
-      // gluQuadricDrawStyle(this->moon, GLU_FILL);
-      // gluQuadricTexture(this->moon, GL_TRUE);
-      // gluSphere(this->moon,0.2,20,20);
+      // glActiveTexture(GL_TEXTURE0);
+      glBindTexture(GL_TEXTURE_2D, this->textures[3]);
+      gluQuadricDrawStyle(this->moon, GLU_FILL);
+      gluQuadricTexture(this->moon, GL_TRUE);
+      gluSphere(this->moon,0.2,20,20);
     glPopMatrix();
 
     // ***** Sphere 2 *****
@@ -195,11 +211,13 @@ void SolarSystemWidget::paintGL()
     // vector is required for the starting point of the object in order that it
     // still orbits around the origin (sun). The cross operator is used.
     glPushMatrix();
-
       glRotatef(this->sphereAngles[1], 1, 4, 0);
       glTranslatef(-6,1.5,0);
-      glutSolidSphere(0.7, 25, 25);
 
+      glBindTexture(GL_TEXTURE_2D, this->textures[5]);
+      gluQuadricDrawStyle(this->neptune, GLU_FILL);
+      gluQuadricTexture(this->neptune, GL_TRUE);
+      gluSphere(this->neptune,0.7,25,25);
     glPopMatrix();
 
     // ***** Sphere 3 ("Jupiter") *****
@@ -207,16 +225,16 @@ void SolarSystemWidget::paintGL()
       glRotatef(this->sphereAngles[2], 0, 1, 0);
       glTranslatef(10,0,0);
 
-      // // glBindTexture(GL_TEXTURE_2D, this->textures[4]);
-      // gluQuadricDrawStyle(this->jupiter, GLU_FILL);
-      // gluQuadricTexture(this->jupiter, GL_TRUE);
-      // gluSphere(this->jupiter,1,20,20);
+      glBindTexture(GL_TEXTURE_2D, this->textures[4]);
+      gluQuadricDrawStyle(this->jupiter, GLU_FILL);
+      gluQuadricTexture(this->jupiter, GL_TRUE);
+      gluSphere(this->jupiter,1,50,50);
     glPopMatrix();
 
   glPopMatrix();
 
   // Set active texture to default
-  // glActiveTexture(GL_TEXTURE0);
+  glActiveTexture(GL_TEXTURE0);
 
 	// flush to screen
 	glFlush();
