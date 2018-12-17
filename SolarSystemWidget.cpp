@@ -3,14 +3,16 @@
 #include <QGLWidget>
 #include <QTimer>
 #include "SolarSystemWidget.h"
-#include <iostream>
 
 
 // constructor
 SolarSystemWidget::SolarSystemWidget(QWidget *parent)
 	: QGLWidget(parent),
+  back_image("./Textures/stars.jpeg"),
   sun_image("./Textures/2k_sun.jpg"),
   earth_image("./Textures/earth.ppm")
+  // moon_image("./Textures/2k_moon.jpg"),
+  // jupiter_image("./Textures/2k_jupiter.jpg")
 	{ // constructor
     sunAngle = 0;
     sphereAngles[0] = 0;
@@ -29,18 +31,24 @@ SolarSystemWidget::SolarSystemWidget(QWidget *parent)
 void SolarSystemWidget::initializeGL()
 	{ // initializeGL()
 
-  // Initialise a quadric
+  // Initialise quadrics
   this->sun = gluNewQuadric();
   this->earth = gluNewQuadric();
+  // this->moon = gluNewQuadric();
+  // this->jupiter = gluNewQuadric();
 
   // Textures
   glGenTextures(5, this->textures);
 
-  // set the widget background
-	glClearColor(0.3, 0.3, 0.3, 0.0);
+  // Background texture
   glActiveTexture(GL_TEXTURE0);
   glEnable(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, this->textures[0]);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, back_image.Width(), back_image.Height(), 0, GL_RGB, GL_UNSIGNED_BYTE, back_image.imageField());
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
   // Sun texture
   glActiveTexture(GL_TEXTURE1);
@@ -62,7 +70,25 @@ void SolarSystemWidget::initializeGL()
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-  glActiveTexture(GL_TEXTURE0);
+  // Moon texture
+  // glActiveTexture(GL_TEXTURE3);
+  // glEnable(GL_TEXTURE_2D);
+  // glBindTexture(GL_TEXTURE_2D, this->textures[3]);
+  // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, moon_image.Width(), moon_image.Height(), 0, GL_RGB, GL_UNSIGNED_BYTE, moon_image.imageField());
+  //   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+  //   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+  //   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  //   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  //
+  // // Jupiter texture
+  // glActiveTexture(GL_TEXTURE4);
+  // glEnable(GL_TEXTURE_2D);
+  // glBindTexture(GL_TEXTURE_2D, this->textures[4]);
+  // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, jupiter_image.Width(), jupiter_image.Height(), 0, GL_RGB, GL_UNSIGNED_BYTE, jupiter_image.imageField());
+  //   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+  //   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+  //   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  //   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	} // initializeGL()
 
 
@@ -81,25 +107,13 @@ void SolarSystemWidget::resizeGL(int w, int h)
 	GLfloat light_pos[] = {0., 0., 0., 1.};
 	glLightfv(GL_LIGHT0, GL_POSITION, light_pos);
 
-	glMatrixMode(GL_PROJECTION);
+
+  glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(-16.0, 16.0, -16.0, 16.0, -16.0, 16.0);
   gluLookAt(1.0,1.0,1.0, 0.0,0.0,0.0, 0.0,1.0,0.0);
 
-  // glMatrixMode(GL_MODELVIEW);
-  // glLoadIdentity();
-  // gluLookAt(0.0,0.0,0.0, 0.0,0.0,0.0, 0.0,1.0,0.0);
-
-
 	} // resizeGL()
-
-void SolarSystemWidget::setMaterial(materialStruct *p_front) {
-
-  glMaterialfv(GL_FRONT, GL_AMBIENT,    p_front->ambient);
-  glMaterialfv(GL_FRONT, GL_DIFFUSE,    p_front->diffuse);
-  glMaterialfv(GL_FRONT, GL_SPECULAR,   p_front->specular);
-  glMaterialf(GL_FRONT, GL_SHININESS,   p_front->shininess);
-}
 
 // called every time the widget needs painting
 void SolarSystemWidget::paintGL()
@@ -107,80 +121,102 @@ void SolarSystemWidget::paintGL()
 	// clear the widget
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	// You must set the matrix mode to model view directly before enabling the depth test
-  glMatrixMode(GL_MODELVIEW);
-	glEnable(GL_DEPTH_TEST); // comment out depth test to observe the result
-
-  glLoadIdentity();
-  // ***** Set scene angle *****
-  glRotatef(this->sceneAngle[0], 1, 0, 0);
-  glRotatef(this->sceneAngle[1], 0, 1, 0);
-  glRotatef(this->sceneAngle[2], 0, 0, 1);
-
-  // ***** Central sphere ("sun") *****
+  // Background image of distant stars (static) -- texture inside of sphere??
+  glMatrixMode(GL_PROJECTION);
   glPushMatrix();
-    glRotatef(this->sunAngle, 0, 1, 0);
-
-    glBindTexture(GL_TEXTURE_2D, this->textures[1]);
+    glBindTexture(GL_TEXTURE_2D, this->textures[0]);
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
-    gluQuadricDrawStyle(this->sun, GLU_FILL);
-    gluQuadricTexture(this->sun, GL_TRUE);
-    gluSphere(this->sun,1.5,20,20);
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    glLoadIdentity();
+    glOrtho(-16.0, 16.0, -16.0, 16.0, -16.0, 16.0);
+    glDisable(GL_DEPTH_TEST);
+    glBegin(GL_QUADS);
+      glTexCoord2f(0,0);
+      glVertex2f(-16,-16);
 
-    // glutSolidSphere(1.5, 50, 50);
+      glTexCoord2f(1,0);
+      glVertex2f(16,-16);
+
+      glTexCoord2f(1,1);
+      glVertex2f(16,16);
+
+      glTexCoord2f(0,1);
+      glVertex2f(-16,16);
+    glEnd();
+    glEnable(GL_DEPTH_TEST);
   glPopMatrix();
+  glClear(GL_DEPTH_BUFFER_BIT);
 
-  // ***** Sphere 1 *****
+	// Prepare for 3D scene
+  glMatrixMode(GL_MODELVIEW);
+	glEnable(GL_DEPTH_TEST);
+  glLoadIdentity();
+
+  // Contains whole scene excluding background
   glPushMatrix();
+    // ***** Set scene angle *****
+    glRotatef(this->sceneAngle[0], 1, 0, 0);
+    glRotatef(this->sceneAngle[1], 0, 1, 0);
+    glRotatef(this->sceneAngle[2], 0, 0, 1);
 
-    glRotatef(this->sphereAngles[0], 0, 1, 0);
-    glTranslatef(3,0,0);
+    // ***** Central sphere ("sun") *****
+    glPushMatrix();
+      glRotatef(this->sunAngle, 0, 1, 0);
 
-    glBindTexture(GL_TEXTURE_2D, this->textures[2]);
-    gluQuadricDrawStyle(this->earth, GLU_FILL);
-    gluQuadricTexture(this->earth, GL_TRUE);
-    gluSphere(this->earth,1,20,20);
+      glBindTexture(GL_TEXTURE_2D, this->textures[1]);
+      gluQuadricDrawStyle(this->sun, GLU_FILL);
+      gluQuadricTexture(this->sun, GL_TRUE);
+      gluSphere(this->sun,1.5,20,20);
+    glPopMatrix();
 
-    // glutSolidSphere(1, 50, 50);
+    // ***** Sphere 1 ("earth") *****
+    glPushMatrix();
+      glRotatef(this->sphereAngles[0], 0, 1, 0);
+      glTranslatef(3,0,0);
 
-    // ***** "Moon" of sphere 1
-    glRotatef(this->sphere1Moon1Angle, 0, 1, 0);
-    glTranslatef(1,0,-1);
-    glActiveTexture(GL_TEXTURE0);
-    setMaterial(&brassMaterials);
-    glutSolidSphere(0.2, 10, 10);
+      glBindTexture(GL_TEXTURE_2D, this->textures[2]);
+      glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+      gluQuadricDrawStyle(this->earth, GLU_FILL);
+      gluQuadricTexture(this->earth, GL_TRUE);
+      gluSphere(this->earth,1,20,20);
+
+      // ***** "Moon" of sphere 1 *****
+      glRotatef(this->sphere1Moon1Angle, 0, 1, 0);
+      glTranslatef(1,0,-1);
+      glActiveTexture(GL_TEXTURE0);
+      // // glBindTexture(GL_TEXTURE_2D, this->textures[3]);
+      // gluQuadricDrawStyle(this->moon, GLU_FILL);
+      // gluQuadricTexture(this->moon, GL_TRUE);
+      // gluSphere(this->moon,0.2,20,20);
+    glPopMatrix();
+
+    // ***** Sphere 2 *****
+    // This object is not in orbit around an axis so the translation needed is
+    // not trivial. The rotation is around the vector (1,4), therefore the normal
+    // vector is required for the starting point of the object in order that it
+    // still orbits around the origin (sun). The cross operator is used.
+    glPushMatrix();
+
+      glRotatef(this->sphereAngles[1], 1, 4, 0);
+      glTranslatef(-6,1.5,0);
+      glutSolidSphere(0.7, 25, 25);
+
+    glPopMatrix();
+
+    // ***** Sphere 3 ("Jupiter") *****
+    glPushMatrix();
+      glRotatef(this->sphereAngles[2], 0, 1, 0);
+      glTranslatef(10,0,0);
+
+      // // glBindTexture(GL_TEXTURE_2D, this->textures[4]);
+      // gluQuadricDrawStyle(this->jupiter, GLU_FILL);
+      // gluQuadricTexture(this->jupiter, GL_TRUE);
+      // gluSphere(this->jupiter,1,20,20);
+    glPopMatrix();
 
   glPopMatrix();
 
-  // ***** Sphere 2 *****
-  // This object is not in orbit around an axis so the translation needed is
-  // not trivial. The rotation is around the vector (1,4), therefore the normal
-  // vector is required for the starting point of the object in order that it
-  // still orbits around the origin (sun). The cross operator is used.
-  glPushMatrix();
-
-    glRotatef(this->sphereAngles[1], 1, 4, 0);
-    glTranslatef(-6,1.5,0);
-    setMaterial(&rubyMaterials);
-    glutSolidSphere(0.7, 25, 25);
-
-  glPopMatrix();
-
-  // ***** Sphere 3 *****
-  glPushMatrix();
-
-    glRotatef(this->sphereAngles[2], 0, 1, 0);
-    glTranslatef(10,0,0);
-    setMaterial(&whiteShinyMaterials);
-    glutSolidSphere(1, 12, 12);
-
-  glPopMatrix();
-
-
-	// glMatrixMode(GL_MODELVIEW);
-	// glLoadIdentity();
-  // gluLookAt(0.,5.,0., 0.0,0.0,0.0, 0.0,1.0,0.0);
+  // Set active texture to default
+  // glActiveTexture(GL_TEXTURE0);
 
 	// flush to screen
 	glFlush();

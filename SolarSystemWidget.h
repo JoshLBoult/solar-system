@@ -6,56 +6,6 @@
 #include <QImage>
 #include "Image.h"
 
-// Setting up material properties
-typedef struct materialStruct {
-  GLfloat ambient[4];
-  GLfloat diffuse[4];
-  GLfloat specular[4];
-  GLfloat shininess;
-} materialStruct;
-
-// Setting up the definition of a planet
-typedef struct planetStruct {
-  float angle;
-  int moons;
-  float moonAngles[];
-} planetBody;
-
-static materialStruct brassMaterials = {
-  { 0.33, 0.22, 0.03, 1.0},
-  { 0.78, 0.57, 0.11, 1.0},
-  { 0.99, 0.91, 0.81, 1.0},
-  27.8
-};
-
-static materialStruct whiteShinyMaterials = {
-  { 1.0, 1.0, 1.0, 1.0},
-  { 1.0, 1.0, 1.0, 1.0},
-  { 1.0, 1.0, 1.0, 1.0},
-  100.0
-};
-
-static materialStruct emeraldMaterials = {
-  { 0.02, 0.17, 0.02, 1.0},
-  { 0.08, 0.61, 0.08, 1.0},
-  { 0.63, 0.73, 0.63, 1.0},
-  76.8
-};
-
-static materialStruct pearlMaterials = {
-  { 0.25, 0.21, 0.21, 1.0},
-  { 1.00, 0.83, 0.83, 1.0},
-  { 0.30, 0.30, 0.30, 1.0},
-  11.26
-};
-
-static materialStruct rubyMaterials = {
-  { 0.17, 0.01, 0.01, 1.0},
-  { 0.61, 0.04, 0.04, 1.0},
-  { 0.73, 0.63, 0.63, 1.0},
-  76.8
-};
-
 class SolarSystemWidget: public QGLWidget
 	{ //
 
@@ -69,8 +19,6 @@ class SolarSystemWidget: public QGLWidget
 	void resizeGL(int w, int h);
 	// called every time the widget needs painting
 	void paintGL();
-  // sets the material
-  void setMaterial(materialStruct *p_front);
 
 	private:
   Q_OBJECT
@@ -81,13 +29,22 @@ class SolarSystemWidget: public QGLWidget
   float sphereAngles[3];
   float sphere1Moon1Angle;
 
+  // Texture images
+  Image back_image;
+  // Image sun_image;
+  // Image earth_image;
+  // Image moon_image;
+  // Image jupiter_image;
+
+  // Quadric spheres
   GLUquadric* sun;
   Image sun_image;
-
-  // Earth-like object
   GLUquadric* earth;
   Image earth_image;
+  // GLUquadric* moon;
+  // GLUquadric* jupiter;
 
+  // Texture array
   GLuint textures[5];
 
   public slots:
