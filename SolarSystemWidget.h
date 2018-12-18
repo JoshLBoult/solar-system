@@ -26,6 +26,7 @@ class SolarSystemWidget: public QGLWidget
   float sceneAngle[3];
 
   float sunAngle;
+  float axisAngles[3];
   float sphereAngles[3];
   float sphere1Moon1Angle;
 

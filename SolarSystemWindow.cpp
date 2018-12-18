@@ -16,7 +16,7 @@ SolarSystemWindow::SolarSystemWindow(QWidget *parent)
 	systemWidget = new SolarSystemWidget(this);
 	windowLayout->addWidget(systemWidget);
 
-	// create sliders
+	// create sliders for changing the scene viewing angle
   x_angleSlider = new QSlider(Qt::Horizontal);
     x_angleSlider->setMinimum(-180);
     x_angleSlider->setMaximum(180);
@@ -29,9 +29,26 @@ SolarSystemWindow::SolarSystemWindow(QWidget *parent)
     z_angleSlider->setMinimum(-180);
     z_angleSlider->setMaximum(180);
     z_angleSlider->setValue(0);
-	windowLayout->addWidget(x_angleSlider);
-  windowLayout->addWidget(y_angleSlider);
-  windowLayout->addWidget(z_angleSlider);
+
+  // Create new layouts to hold sliders and labels
+  xSliderLayout = new QBoxLayout(QBoxLayout::LeftToRight, this);
+  xLabel = new QLabel("X: ");
+    xSliderLayout->addWidget(xLabel);
+    xSliderLayout->addWidget(x_angleSlider);
+  ySliderLayout = new QBoxLayout(QBoxLayout::LeftToRight, this);
+  yLabel = new QLabel("Y: ");
+    ySliderLayout->addWidget(yLabel);
+    ySliderLayout->addWidget(y_angleSlider);
+
+  zSliderLayout = new QBoxLayout(QBoxLayout::LeftToRight, this);
+  zLabel = new QLabel("Z: ");
+    zSliderLayout->addWidget(zLabel);
+    zSliderLayout->addWidget(z_angleSlider);
+
+  // Add sliders and labels
+  windowLayout->addLayout(xSliderLayout);
+  windowLayout->addLayout(ySliderLayout);
+  windowLayout->addLayout(zSliderLayout);
 
   // Signals and slots
   connect(x_angleSlider, SIGNAL(valueChanged(int)), systemWidget, SLOT(setxAngle(int)));

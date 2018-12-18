@@ -17,7 +17,13 @@ SolarSystemWidget::SolarSystemWidget(QWidget *parent)
   jupiter_image("./Textures/2k_jupiter.jpg"),
   neptune_image("./Textures/2k_neptune.jpg")
 	{ // constructor
+    // Rotation about axis
     sunAngle = 0;
+    axisAngles[0] = 0;
+    axisAngles[1] = 0;
+    axisAngles[2] = 0;
+
+    // Rotation around central sphere/planets
     sphereAngles[0] = 0;
     sphere1Moon1Angle = 0;
     sphereAngles[1] = -30;
@@ -184,12 +190,15 @@ void SolarSystemWidget::paintGL()
 
     // ***** Sphere 1 ("earth") *****
     glPushMatrix();
+      // Rotation about central sphere and distance from central sphere
       glRotatef(this->sphereAngles[0], 0, 1, 0);
       glTranslatef(3,0,0);
+      // Axis rotation
+      glRotatef(this->axisAngles[0], 0, 1, 0);
 
       glBindTexture(GL_TEXTURE_2D, this->textures[2]);
 
-      // Use GL_ADD to make the scene brighter, if somewhat less realistic
+      // Using GL_ADD to make the scene brighter, if somewhat less realistic
       glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ADD);
       gluQuadricDrawStyle(this->earth, GLU_FILL);
       gluQuadricTexture(this->earth, GL_TRUE);
@@ -198,7 +207,6 @@ void SolarSystemWidget::paintGL()
       // ***** "Moon" of sphere 1 *****
       glRotatef(this->sphere1Moon1Angle, 0, 1, 0);
       glTranslatef(1,0,-1);
-      // glActiveTexture(GL_TEXTURE0);
       glBindTexture(GL_TEXTURE_2D, this->textures[3]);
       gluQuadricDrawStyle(this->moon, GLU_FILL);
       gluQuadricTexture(this->moon, GL_TRUE);
@@ -211,8 +219,11 @@ void SolarSystemWidget::paintGL()
     // vector is required for the starting point of the object in order that it
     // still orbits around the origin (sun). The cross operator is used.
     glPushMatrix();
+      // Rotation about central sphere and distance from central sphere
       glRotatef(this->sphereAngles[1], 1, 4, 0);
       glTranslatef(-6,1.5,0);
+      // Axis rotation
+      glRotatef(this->axisAngles[1], 0, 1, 0);
 
       glBindTexture(GL_TEXTURE_2D, this->textures[5]);
       gluQuadricDrawStyle(this->neptune, GLU_FILL);
@@ -222,8 +233,11 @@ void SolarSystemWidget::paintGL()
 
     // ***** Sphere 3 ("Jupiter") *****
     glPushMatrix();
+      // Rotation about central sphere and distance from central sphere
       glRotatef(this->sphereAngles[2], 0, 1, 0);
       glTranslatef(10,0,0);
+      // Axis rotation
+      glRotatef(this->axisAngles[2], 0, 1, 0);
 
       glBindTexture(GL_TEXTURE_2D, this->textures[4]);
       gluQuadricDrawStyle(this->jupiter, GLU_FILL);
@@ -257,7 +271,13 @@ void SolarSystemWidget::setzAngle(int newAngle)  {
 }
 
 void SolarSystemWidget::incrementAngle()  {
+  // Rotation of spheres on their axis, one in different direction
   this->sunAngle = sunAngle + 0.25;
+  this->axisAngles[0] = axisAngles[0] + 0.5;
+  this->axisAngles[1] = axisAngles[1] - 0.5;
+  this->axisAngles[2] = axisAngles[2] + 0.5;
+
+  // Rotation around central sphere/planet, moon in reverse direction
   this->sphereAngles[0] = sphereAngles[0] + 1;
   this->sphere1Moon1Angle = sphere1Moon1Angle - 2;
   this->sphereAngles[1] = sphereAngles[1] + 2;
