@@ -22,13 +22,23 @@ class SolarSystemWidget: public QGLWidget
 
 	private:
   Q_OBJECT
-	void fillimage();
+
+  // Object drawing
+  void drawSun();
+  void drawEarth();
+  void drawMoon();
+  void drawNeptune();
+  void drawJupiter();
+
+  // Angles of rotation about axes and other objects
   float sceneAngle[3];
 
   float sunAngle;
   float axisAngles[3];
   float sphereAngles[3];
   float sphere1Moon1Angle;
+  float satelliteAngle;
+  float satelliteDistance;
 
   // Texture images
   Image back_image;
@@ -44,6 +54,9 @@ class SolarSystemWidget: public QGLWidget
   GLUquadric* moon;
   GLUquadric* jupiter;
   GLUquadric* neptune;
+
+  // Quadric cylinders
+  GLUquadric* satellite;
 
   // Texture array
   GLuint textures[6];

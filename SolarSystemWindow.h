@@ -19,7 +19,7 @@ class SolarSystemWindow: public QWidget
 	SolarSystemWindow(QWidget *parent);
 	~SolarSystemWindow();
 
-	// visual hierarchy
+
 
 	// window layout
 	QBoxLayout *windowLayout;

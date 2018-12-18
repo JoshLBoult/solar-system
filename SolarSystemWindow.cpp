@@ -31,16 +31,16 @@ SolarSystemWindow::SolarSystemWindow(QWidget *parent)
     z_angleSlider->setValue(0);
 
   // Create new layouts to hold sliders and labels
-  xSliderLayout = new QBoxLayout(QBoxLayout::LeftToRight, this);
+  xSliderLayout = new QBoxLayout(QBoxLayout::LeftToRight);
   xLabel = new QLabel("X: ");
     xSliderLayout->addWidget(xLabel);
     xSliderLayout->addWidget(x_angleSlider);
-  ySliderLayout = new QBoxLayout(QBoxLayout::LeftToRight, this);
+  ySliderLayout = new QBoxLayout(QBoxLayout::LeftToRight);
   yLabel = new QLabel("Y: ");
     ySliderLayout->addWidget(yLabel);
     ySliderLayout->addWidget(y_angleSlider);
 
-  zSliderLayout = new QBoxLayout(QBoxLayout::LeftToRight, this);
+  zSliderLayout = new QBoxLayout(QBoxLayout::LeftToRight);
   zLabel = new QLabel("Z: ");
     zSliderLayout->addWidget(zLabel);
     zSliderLayout->addWidget(z_angleSlider);

@@ -7,6 +7,12 @@
 // Author = Josh Boult
 // This is NOT a truthful representation of our solar system
 
+// Hardcoded values for radius of orbit
+double EARTH_DISTANCE = 4; // x direction
+double MOON_DISTANCE = 1; // positive x, negative z
+double NEPTUNE_DISTANCE = 1.5; // positive y, negative x * 4
+double JUPITER_DISTANCE = 12; // positive x
+
 // constructor
 SolarSystemWidget::SolarSystemWidget(QWidget *parent)
 	: QGLWidget(parent),
@@ -27,12 +33,16 @@ SolarSystemWidget::SolarSystemWidget(QWidget *parent)
     sphereAngles[0] = 0;
     sphere1Moon1Angle = 0;
     sphereAngles[1] = -30;
+    satelliteAngle = 0;
     sphereAngles[2] = 0;
 
     // Scene angles (x,y,z)
     sceneAngle[0] = 0;
     sceneAngle[1] = 0;
     sceneAngle[2] = 0;
+
+    // satelliteDistance
+    satelliteDistance = 2;
 
 	} // constructor
 
@@ -46,6 +56,7 @@ void SolarSystemWidget::initializeGL()
   this->moon = gluNewQuadric();
   this->jupiter = gluNewQuadric();
   this->neptune = gluNewQuadric();
+  this->satellite = gluNewQuadric();
 
   // Textures
   glGenTextures(6, this->textures);
@@ -135,6 +146,42 @@ void SolarSystemWidget::resizeGL(int w, int h)
 
 	} // resizeGL()
 
+// Objects
+void SolarSystemWidget::drawSun() {
+  glBindTexture(GL_TEXTURE_2D, this->textures[1]);
+  gluQuadricDrawStyle(this->sun, GLU_FILL);
+  gluQuadricTexture(this->sun, GL_TRUE);
+  gluSphere(this->sun,1.5,20,20);
+}
+
+void SolarSystemWidget::drawEarth() {
+  glBindTexture(GL_TEXTURE_2D, this->textures[2]);
+  gluQuadricDrawStyle(this->earth, GLU_FILL);
+  gluQuadricTexture(this->earth, GL_TRUE);
+  gluSphere(this->earth,1,20,20);
+}
+
+void SolarSystemWidget::drawMoon() {
+  glBindTexture(GL_TEXTURE_2D, this->textures[3]);
+  gluQuadricDrawStyle(this->moon, GLU_FILL);
+  gluQuadricTexture(this->moon, GL_TRUE);
+  gluSphere(this->moon,0.2,20,20);
+}
+
+void SolarSystemWidget::drawNeptune() {
+  glBindTexture(GL_TEXTURE_2D, this->textures[5]);
+  gluQuadricDrawStyle(this->neptune, GLU_FILL);
+  gluQuadricTexture(this->neptune, GL_TRUE);
+  gluSphere(this->neptune,0.7,25,25);
+}
+
+void SolarSystemWidget::drawJupiter() {
+  glBindTexture(GL_TEXTURE_2D, this->textures[4]);
+  gluQuadricDrawStyle(this->jupiter, GLU_FILL);
+  gluQuadricTexture(this->jupiter, GL_TRUE);
+  gluSphere(this->jupiter,1,50,50);
+}
+
 // called every time the widget needs painting
 void SolarSystemWidget::paintGL()
 	{ // paintGL()
@@ -181,36 +228,24 @@ void SolarSystemWidget::paintGL()
     // ***** Central sphere ("sun") *****
     glPushMatrix();
       glRotatef(this->sunAngle, 0, 1, 0);
-
-      glBindTexture(GL_TEXTURE_2D, this->textures[1]);
-      gluQuadricDrawStyle(this->sun, GLU_FILL);
-      gluQuadricTexture(this->sun, GL_TRUE);
-      gluSphere(this->sun,1.5,20,20);
+      this->drawSun();
     glPopMatrix();
 
     // ***** Sphere 1 ("earth") *****
     glPushMatrix();
       // Rotation about central sphere and distance from central sphere
       glRotatef(this->sphereAngles[0], 0, 1, 0);
-      glTranslatef(3,0,0);
+      glTranslatef(EARTH_DISTANCE,0,0);
       // Axis rotation
       glRotatef(this->axisAngles[0], 0, 1, 0);
-
-      glBindTexture(GL_TEXTURE_2D, this->textures[2]);
-
       // Using GL_ADD to make the scene brighter, if somewhat less realistic
       glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ADD);
-      gluQuadricDrawStyle(this->earth, GLU_FILL);
-      gluQuadricTexture(this->earth, GL_TRUE);
-      gluSphere(this->earth,1,20,20);
+      this->drawEarth();
 
       // ***** "Moon" of sphere 1 *****
       glRotatef(this->sphere1Moon1Angle, 0, 1, 0);
-      glTranslatef(1,0,-1);
-      glBindTexture(GL_TEXTURE_2D, this->textures[3]);
-      gluQuadricDrawStyle(this->moon, GLU_FILL);
-      gluQuadricTexture(this->moon, GL_TRUE);
-      gluSphere(this->moon,0.2,20,20);
+      glTranslatef(MOON_DISTANCE,0,-MOON_DISTANCE);
+      this->drawMoon();
     glPopMatrix();
 
     // ***** Sphere 2 *****
@@ -221,28 +256,29 @@ void SolarSystemWidget::paintGL()
     glPushMatrix();
       // Rotation about central sphere and distance from central sphere
       glRotatef(this->sphereAngles[1], 1, 4, 0);
-      glTranslatef(-6,1.5,0);
+      glTranslatef(-4*(NEPTUNE_DISTANCE),NEPTUNE_DISTANCE,0);
       // Axis rotation
       glRotatef(this->axisAngles[1], 0, 1, 0);
+      this->drawNeptune();
 
-      glBindTexture(GL_TEXTURE_2D, this->textures[5]);
-      gluQuadricDrawStyle(this->neptune, GLU_FILL);
-      gluQuadricTexture(this->neptune, GL_TRUE);
-      gluSphere(this->neptune,0.7,25,25);
+      // ***** User sends satellite to this sphere *****
+      glRotatef(this->satelliteAngle, 0, 1, 0);
+      glTranslatef(this->satelliteDistance,0,0);
+      gluCylinder(this->satellite,0.2,0.2,0.6,10,10);
+      // ******** DRAW CYLINDER ***** quadric, baseSize/top (0.2), height 0.6, 10 slices/stacks
+      // glTranslatef(RADIUS,0,HALFHEIGHT);
+      // glPushMatrix();
+
     glPopMatrix();
 
     // ***** Sphere 3 ("Jupiter") *****
     glPushMatrix();
       // Rotation about central sphere and distance from central sphere
       glRotatef(this->sphereAngles[2], 0, 1, 0);
-      glTranslatef(10,0,0);
+      glTranslatef(JUPITER_DISTANCE,0,0);
       // Axis rotation
       glRotatef(this->axisAngles[2], 0, 1, 0);
-
-      glBindTexture(GL_TEXTURE_2D, this->textures[4]);
-      gluQuadricDrawStyle(this->jupiter, GLU_FILL);
-      gluQuadricTexture(this->jupiter, GL_TRUE);
-      gluSphere(this->jupiter,1,50,50);
+      this->drawJupiter();
     glPopMatrix();
 
   glPopMatrix();
