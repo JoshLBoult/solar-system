@@ -21,7 +21,8 @@ SolarSystemWidget::SolarSystemWidget(QWidget *parent)
   earth_image("./Textures/earth.ppm"),
   moon_image("./Textures/2k_moon.jpg"),
   jupiter_image("./Textures/2k_jupiter.jpg"),
-  neptune_image("./Textures/2k_neptune.jpg")
+  neptune_image("./Textures/2k_neptune.jpg"),
+  moi_image("./Textures/Moi.ppm")
 	{ // constructor
     // Rotation about axis
     sunAngle = 0;
@@ -29,12 +30,14 @@ SolarSystemWidget::SolarSystemWidget(QWidget *parent)
     axisAngles[1] = 0;
     axisAngles[2] = 0;
 
-    // Rotation around central sphere/planets
+    // Rotation around central sphere/other objects
     sphereAngles[0] = 0;
     sphere1Moon1Angle = 0;
     sphereAngles[1] = -30;
     satelliteAngle = 0;
     sphereAngles[2] = 0;
+    solarPanelAngle[0] = 0;
+    solarPanelAngle[1] = 0;
 
     // Scene angles (x,y,z)
     sceneAngle[0] = 0;
@@ -58,6 +61,7 @@ void SolarSystemWidget::initializeGL()
   this->neptune = gluNewQuadric();
   // satellite
   this->satellite = gluNewQuadric();
+  this->satelliteEnd = gluNewQuadric();
   this->joint[0] = gluNewQuadric();
   this->joint[1] = gluNewQuadric();
   this->panel[0] = gluNewQuadric();
@@ -121,6 +125,16 @@ void SolarSystemWidget::initializeGL()
   glEnable(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, this->textures[5]);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, neptune_image.Width(), neptune_image.Height(), 0, GL_RGB, GL_UNSIGNED_BYTE, neptune_image.imageField());
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+  // Satelitte end texture
+  glActiveTexture(GL_TEXTURE6);
+  glEnable(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D, this->textures[6]);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, moi_image.Width(), moi_image.Height(), 0, GL_RGB, GL_UNSIGNED_BYTE, moi_image.imageField());
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -195,23 +209,28 @@ void SolarSystemWidget::drawSatelliteBody() {
 
   gluQuadricDrawStyle(this->satellite, GLU_FILL);
   gluCylinder(this->satellite,0.2,0.2,0.6,10,10);
-
+  glPopAttrib();
   // Close the cylinder with disks
+  glBindTexture(GL_TEXTURE_2D, this->textures[6]);
+  gluQuadricDrawStyle(this->satelliteEnd, GLU_FILL);
+  gluQuadricTexture(this->satelliteEnd, GL_TRUE);
   glPushMatrix();
     glTranslatef(0,0,0.6);
-    gluDisk(this->satellite,0,0.2,10,1);
+    gluDisk(this->satelliteEnd,0,0.2,10,1);
   glPopMatrix();
   glPushMatrix();
     glRotatef(180,1,0,0);
-    gluDisk(this->satellite,0,0.2,10,1);
+    gluDisk(this->satelliteEnd,0,0.2,10,1);
   glPopMatrix();
   // Add the joints
+  glPushAttrib(GL_LIGHTING_BIT);
   glPushMatrix();
     glRotatef(90,0,1,0);
     glTranslatef(-0.3,0,0.2);
     gluCylinder(this->joint[0],0.05,0.05,0.1,5,5);
     // First solar panel
     glPushMatrix();
+    glRotatef(this->solarPanelAngle[0],0,0,1);
     glTranslatef(0,0,0.1);
       this->drawSolarPanel();
     glPopMatrix();
@@ -220,6 +239,7 @@ void SolarSystemWidget::drawSatelliteBody() {
     gluCylinder(this->joint[1],0.05,0.05,0.1,5,5);
     // First solar panel
     glPushMatrix();
+    glRotatef(this->solarPanelAngle[1],0,0,1);
     glTranslatef(0,0,-0.5);
       this->drawSolarPanel();
     glPopMatrix();
@@ -366,11 +386,10 @@ void SolarSystemWidget::paintGL()
       glRotatef(this->axisAngles[1], 0, 1, 0);
       this->drawNeptune();
 
-      // ***** User sends satellite to this sphere *****
+      // ***** User controls satellite on this sphere *****
       glRotatef(this->satelliteAngle, 0, 1, 0);
       glTranslatef(this->satelliteDistance,0,0);
       this->drawSatelliteBody();
-      // glPushMatrix();
 
     glPopMatrix();
 
@@ -420,6 +439,9 @@ void SolarSystemWidget::incrementAngle()  {
   this->sphereAngles[0] = sphereAngles[0] + 1;
   this->sphere1Moon1Angle = sphere1Moon1Angle - 2;
   this->sphereAngles[1] = sphereAngles[1] + 2;
-  this->sphereAngles[2] = sphereAngles[2] + 3;
+  this->sphereAngles[2] = sphereAngles[2] + 2.75;
+  this->satelliteAngle = satelliteAngle + 1;
+  this->solarPanelAngle[0] = solarPanelAngle[0] + 3;
+  this->solarPanelAngle[1] = solarPanelAngle[1] - 3;
   this->update();
 }

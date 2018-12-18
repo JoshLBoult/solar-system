@@ -41,6 +41,7 @@ class SolarSystemWidget: public QGLWidget
   float sphere1Moon1Angle;
   float satelliteAngle;
   float satelliteDistance;
+  float solarPanelAngle[2];
 
   // Texture images
   Image back_image;
@@ -49,6 +50,7 @@ class SolarSystemWidget: public QGLWidget
   Image moon_image;
   Image jupiter_image;
   Image neptune_image;
+  Image moi_image;
 
   // Quadric spheres
   GLUquadric* sun;
@@ -59,11 +61,12 @@ class SolarSystemWidget: public QGLWidget
 
   // Quadric cylinders
   GLUquadric* satellite;
+  GLUquadric* satelliteEnd;
   GLUquadric* joint[2];
   GLUquadric* panel[2];
 
   // Texture array
-  GLuint textures[6];
+  GLuint textures[7];
 
   public slots:
 
