@@ -56,7 +56,12 @@ void SolarSystemWidget::initializeGL()
   this->moon = gluNewQuadric();
   this->jupiter = gluNewQuadric();
   this->neptune = gluNewQuadric();
+  // satellite
   this->satellite = gluNewQuadric();
+  this->joint[0] = gluNewQuadric();
+  this->joint[1] = gluNewQuadric();
+  this->panel[0] = gluNewQuadric();
+  this->panel[1] = gluNewQuadric();
 
   // Textures
   glGenTextures(6, this->textures);
@@ -175,6 +180,106 @@ void SolarSystemWidget::drawNeptune() {
   gluSphere(this->neptune,0.7,25,25);
 }
 
+void SolarSystemWidget::drawSatelliteBody() {
+  // Set material properties, pushing the lighting so as not to effect other objects
+  glPushAttrib(GL_LIGHTING_BIT);
+  GLfloat ambient[4] = {0.17,0.012,0.012,1.0};
+  GLfloat diffuse[4] = {0.61,0.04,0.04,1.0};
+  GLfloat specular[4] = {0.73,0.63,0.63,1.0};
+  GLfloat shininess = 0.6;
+
+  glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
+  glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
+  glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
+  glMaterialf(GL_FRONT, GL_SHININESS, shininess*128);
+
+  gluQuadricDrawStyle(this->satellite, GLU_FILL);
+  gluCylinder(this->satellite,0.2,0.2,0.6,10,10);
+
+  // Close the cylinder with disks
+  glPushMatrix();
+    glTranslatef(0,0,0.6);
+    gluDisk(this->satellite,0,0.2,10,1);
+  glPopMatrix();
+  glPushMatrix();
+    glRotatef(180,1,0,0);
+    gluDisk(this->satellite,0,0.2,10,1);
+  glPopMatrix();
+  // Add the joints
+  glPushMatrix();
+    glRotatef(90,0,1,0);
+    glTranslatef(-0.3,0,0.2);
+    gluCylinder(this->joint[0],0.05,0.05,0.1,5,5);
+    // First solar panel
+    glPushMatrix();
+    glTranslatef(0,0,0.1);
+      this->drawSolarPanel();
+    glPopMatrix();
+
+    glTranslatef(0,0,-0.5);
+    gluCylinder(this->joint[1],0.05,0.05,0.1,5,5);
+    // First solar panel
+    glPushMatrix();
+    glTranslatef(0,0,-0.5);
+      this->drawSolarPanel();
+    glPopMatrix();
+  glPopMatrix();
+  glPopAttrib();
+}
+
+void SolarSystemWidget::drawSolarPanel() {
+  // Normals
+  GLfloat normals[6][3] = { {1., 0. ,0.}, {-1., 0., 0.}, {0., 0., 1.}, {0., 0., -1.}, {0, 1, 0}, {0, -1, 0} };
+
+  glNormal3fv(normals[0]);
+  glBegin(GL_POLYGON);
+    glVertex3f( 0.1, -0.01,  0.5);
+    glVertex3f( 0.1, -0.01, 0);
+    glVertex3f( 0.1,  0.01, 0);
+    glVertex3f( 0.1,  0.01,  0.5);
+  glEnd();
+
+  glNormal3fv(normals[1]);
+  glBegin(GL_POLYGON);
+    glVertex3f( -0.1, -0.01,  0.5);
+    glVertex3f( -0.1, -0.01, 0);
+    glVertex3f( -0.1,  0.01, 0);
+    glVertex3f( -0.1,  0.01,  0.5);
+  glEnd();
+
+  glNormal3fv(normals[2]);
+  glBegin(GL_POLYGON);
+    glVertex3f(-0.1, -0.01, 0.5);
+    glVertex3f( 0.1, -0.01, 0.5);
+    glVertex3f( 0.1,  0.01, 0.5);
+    glVertex3f(-0.1,  0.01, 0.5);
+  glEnd();
+
+  glNormal3fv(normals[3]);
+  glBegin(GL_POLYGON);
+    glVertex3f(-0.1, -0.01, 0);
+    glVertex3f( 0.1, -0.01, 0);
+    glVertex3f( 0.1,  0.01, 0);
+    glVertex3f(-0.1,  0.01, 0);
+  glEnd();
+
+  glNormal3fv(normals[4]);
+  glBegin(GL_POLYGON);
+    glVertex3f(  0.1,  0.01,  0.5);
+    glVertex3f(  0.1,  0.01, 0);
+    glVertex3f( -0.1,  0.01, 0);
+    glVertex3f( -0.1,  0.01,  0.5);
+  glEnd();
+
+  glNormal3fv(normals[5]);
+  glBegin(GL_POLYGON);
+    glVertex3f(  0.1,  -0.01,  0.5);
+    glVertex3f(  0.1,  -0.01, 0);
+    glVertex3f( -0.1,  -0.01, 0);
+    glVertex3f( -0.1,  -0.01,  0.5);
+  glEnd();
+}
+
 void SolarSystemWidget::drawJupiter() {
   glBindTexture(GL_TEXTURE_2D, this->textures[4]);
   gluQuadricDrawStyle(this->jupiter, GLU_FILL);
@@ -264,9 +369,7 @@ void SolarSystemWidget::paintGL()
       // ***** User sends satellite to this sphere *****
       glRotatef(this->satelliteAngle, 0, 1, 0);
       glTranslatef(this->satelliteDistance,0,0);
-      gluCylinder(this->satellite,0.2,0.2,0.6,10,10);
-      // ******** DRAW CYLINDER ***** quadric, baseSize/top (0.2), height 0.6, 10 slices/stacks
-      // glTranslatef(RADIUS,0,HALFHEIGHT);
+      this->drawSatelliteBody();
       // glPushMatrix();
 
     glPopMatrix();
