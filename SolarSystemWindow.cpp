@@ -12,6 +12,23 @@ SolarSystemWindow::SolarSystemWindow(QWidget *parent)
 	// create the window layout
 	windowLayout = new QBoxLayout(QBoxLayout::TopToBottom, this);
 
+  // Satellite interaction at the top of window
+  satelliteLayout = new QBoxLayout(QBoxLayout::LeftToRight);
+  speedLabel = new QLabel("Satellite speed:");
+    speedSpinBox = new QSpinBox;
+    speedSpinBox->setRange(0,5);
+    speedSpinBox->setValue(1);
+  orbitLabel = new QLabel("Satellite distance:");
+    orbitSpinBox = new QSpinBox;
+    orbitSpinBox->setRange(1,5);
+    orbitSpinBox->setValue(2);
+
+  satelliteLayout->addWidget(speedLabel);
+  satelliteLayout->addWidget(speedSpinBox);
+  satelliteLayout->addWidget(orbitLabel);
+  satelliteLayout->addWidget(orbitSpinBox);
+  windowLayout->addLayout(satelliteLayout);
+
 	// create main widget
 	systemWidget = new SolarSystemWidget(this);
 	windowLayout->addWidget(systemWidget);
@@ -56,6 +73,9 @@ SolarSystemWindow::SolarSystemWindow(QWidget *parent)
   connect(z_angleSlider, SIGNAL(valueChanged(int)), systemWidget, SLOT(setzAngle(int)));
 
   connect(angleTimer, SIGNAL(timeout()), systemWidget, SLOT(incrementAngle()));
+
+  connect(speedSpinBox, SIGNAL(valueChanged(int)), systemWidget, SLOT(setSpeed(int)));
+  connect(orbitSpinBox, SIGNAL(valueChanged(int)), systemWidget, SLOT(setDistance(int)));
 
 	} // constructor
 

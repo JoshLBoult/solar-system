@@ -4,6 +4,7 @@
 #include <QGLWidget>
 #include <QMenuBar>
 #include <QSlider>
+#include <QSpinBox>
 #include <QBoxLayout>
 #include <QFormLayout>
 #include <QLabel>
@@ -19,10 +20,15 @@ class SolarSystemWindow: public QWidget
 	SolarSystemWindow(QWidget *parent);
 	~SolarSystemWindow();
 
-
-
 	// window layout
 	QBoxLayout *windowLayout;
+
+  // Satellite layout
+  QBoxLayout *satelliteLayout;
+  QLabel *speedLabel;
+  QSpinBox *speedSpinBox;
+  QLabel *orbitLabel;
+  QSpinBox *orbitSpinBox;
 
 	// beneath that, the main widget
 	SolarSystemWidget *systemWidget;

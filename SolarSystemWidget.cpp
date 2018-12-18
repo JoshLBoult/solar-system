@@ -46,6 +46,7 @@ SolarSystemWidget::SolarSystemWidget(QWidget *parent)
 
     // satelliteDistance
     satelliteDistance = 2;
+    satelliteSpeed = 1;
 
 	} // constructor
 
@@ -389,6 +390,7 @@ void SolarSystemWidget::paintGL()
       // ***** User controls satellite on this sphere *****
       glRotatef(this->satelliteAngle, 0, 1, 0);
       glTranslatef(this->satelliteDistance,0,0);
+      glRotatef(90,0,1,0);
       this->drawSatelliteBody();
 
     glPopMatrix();
@@ -413,6 +415,9 @@ void SolarSystemWidget::paintGL()
 
 	} // paintGL()
 
+
+
+// ********** Slots **********
 void SolarSystemWidget::setxAngle(int newAngle)  {
   this->sceneAngle[0] = (float)newAngle;
   this->update();
@@ -440,8 +445,18 @@ void SolarSystemWidget::incrementAngle()  {
   this->sphere1Moon1Angle = sphere1Moon1Angle - 2;
   this->sphereAngles[1] = sphereAngles[1] + 2;
   this->sphereAngles[2] = sphereAngles[2] + 2.75;
-  this->satelliteAngle = satelliteAngle + 1;
+  this->satelliteAngle = satelliteAngle + satelliteSpeed;
   this->solarPanelAngle[0] = solarPanelAngle[0] + 3;
   this->solarPanelAngle[1] = solarPanelAngle[1] - 3;
+  this->update();
+}
+
+void SolarSystemWidget::setSpeed(int newSpeed)  {
+  this->satelliteSpeed = newSpeed;
+  this->update();
+}
+
+void SolarSystemWidget::setDistance(int newDistance)  {
+  this->satelliteDistance = newDistance;
   this->update();
 }

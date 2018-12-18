@@ -41,7 +41,9 @@ class SolarSystemWidget: public QGLWidget
   float sphere1Moon1Angle;
   float satelliteAngle;
   float satelliteDistance;
+  float satelliteSpeed;
   float solarPanelAngle[2];
+
 
   // Texture images
   Image back_image;
@@ -74,6 +76,8 @@ class SolarSystemWidget: public QGLWidget
   void setyAngle(int newAngle);
   void setzAngle(int newAngle);
   void incrementAngle();
+  void setSpeed(int newSpeed);
+  void setDistance(int newDistance);
 
 	}; // class GLPolygonWidget
 
