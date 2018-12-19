@@ -1,13 +1,10 @@
-#ifndef __GL_POLYGON_WIDGET_H__
-#define __GL_POLYGON_WIDGET_H__ 1
-
 #include <QGLWidget>
 #include <QObject>
 #include <QImage>
 #include "Image.h"
 
 class SolarSystemWidget: public QGLWidget
-	{ //
+	{
 
 	public:
 	SolarSystemWidget(QWidget *parent);
@@ -65,7 +62,6 @@ class SolarSystemWidget: public QGLWidget
   GLUquadric* satellite;
   GLUquadric* satelliteEnd;
   GLUquadric* joint[2];
-  GLUquadric* panel[2];
 
   // Texture array
   GLuint textures[7];
@@ -79,6 +75,4 @@ class SolarSystemWidget: public QGLWidget
   void setSpeed(int newSpeed);
   void setDistance(int newDistance);
 
-	}; // class GLPolygonWidget
-
-#endif
+	};

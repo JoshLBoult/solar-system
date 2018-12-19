@@ -1,8 +1,4 @@
-#ifndef __GL_POLYGON_WINDOW_H__
-#define __GL_POLYGON_WINDOW_H__ 1
-
 #include <QGLWidget>
-#include <QMenuBar>
 #include <QSlider>
 #include <QSpinBox>
 #include <QBoxLayout>
@@ -38,7 +34,7 @@ class SolarSystemWindow: public QWidget
   QSlider *y_angleSlider;
   QSlider *z_angleSlider;
 
-  // Layout to gold sliders;
+  // Layout to hold sliders;
   QBoxLayout *xSliderLayout;
   QLabel *xLabel;
   QBoxLayout *ySliderLayout;
@@ -48,9 +44,4 @@ class SolarSystemWindow: public QWidget
 
   // Add timers
   QTimer *angleTimer;
-
-	// resets all the interface elements
-	void ResetInterface();
 	};
-
-#endif

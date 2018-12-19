@@ -1,11 +1,9 @@
 #include <GL/glu.h>
-#include <GL/glut.h>
 #include <QGLWidget>
-#include <QTimer>
 #include "SolarSystemWidget.h"
 
 // Author = Josh Boult
-// This is NOT a truthful representation of our solar system
+// This is NOT an accurate representation of our solar system
 
 // Hardcoded values for radius of orbit
 double EARTH_DISTANCE = 4; // x direction
@@ -24,35 +22,34 @@ SolarSystemWidget::SolarSystemWidget(QWidget *parent)
   neptune_image("./Textures/2k_neptune.jpg"),
   moi_image("./Textures/Moi.ppm")
 	{ // constructor
-    // Rotation about axis
+    // Rotation on axis
     sunAngle = 0;
     axisAngles[0] = 0;
     axisAngles[1] = 0;
     axisAngles[2] = 0;
 
-    // Rotation around central sphere/other objects
+    // Rotation around central sphere/other objects - hierarchy demonstrated by indents
     sphereAngles[0] = 0;
-    sphere1Moon1Angle = 0;
+      sphere1Moon1Angle = 0;
     sphereAngles[1] = -30;
-    satelliteAngle = 0;
+      satelliteAngle = 0;
+        solarPanelAngle[0] = 0;
+        solarPanelAngle[1] = 0;
     sphereAngles[2] = 0;
-    solarPanelAngle[0] = 0;
-    solarPanelAngle[1] = 0;
 
     // Scene angles (x,y,z)
     sceneAngle[0] = 0;
     sceneAngle[1] = 0;
     sceneAngle[2] = 0;
 
-    // satelliteDistance
+    // Satellite distance and speed defaults, can be changed by user
     satelliteDistance = 2;
     satelliteSpeed = 1;
 
 	} // constructor
 
 // called when OpenGL context is set up
-void SolarSystemWidget::initializeGL()
-	{ // initializeGL()
+void SolarSystemWidget::initializeGL() {
 
   // Initialise quadrics
   this->sun = gluNewQuadric();
@@ -60,16 +57,14 @@ void SolarSystemWidget::initializeGL()
   this->moon = gluNewQuadric();
   this->jupiter = gluNewQuadric();
   this->neptune = gluNewQuadric();
-  // satellite
+  // satellite quadrics
   this->satellite = gluNewQuadric();
   this->satelliteEnd = gluNewQuadric();
   this->joint[0] = gluNewQuadric();
   this->joint[1] = gluNewQuadric();
-  this->panel[0] = gluNewQuadric();
-  this->panel[1] = gluNewQuadric();
 
-  // Textures
-  glGenTextures(6, this->textures);
+  // Textures to generate
+  glGenTextures(7, this->textures);
 
   // Background texture
   glActiveTexture(GL_TEXTURE0);
@@ -131,7 +126,7 @@ void SolarSystemWidget::initializeGL()
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-  // Satelitte end texture
+  // Satelitte end texture (Marc De Kamps branded satellite)
   glActiveTexture(GL_TEXTURE6);
   glEnable(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, this->textures[6]);
@@ -140,33 +135,33 @@ void SolarSystemWidget::initializeGL()
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	} // initializeGL()
+	}
 
 
 // called every time the widget is resized
 void SolarSystemWidget::resizeGL(int w, int h)
-	{ // resizeGL()
+	{
 	// set the viewport to the entire widget
 	glViewport(0, 0, w, h);
 
 	glMatrixMode(GL_MODELVIEW);
-
 	glLoadIdentity();
 
+  // Point light in centre of the scene
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
 	GLfloat light_pos[] = {0., 0., 0., 1.};
 	glLightfv(GL_LIGHT0, GL_POSITION, light_pos);
 
-
+  // Camera and clipping
   glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(-16.0, 16.0, -16.0, 16.0, -16.0, 16.0);
   gluLookAt(1.0,1.0,1.0, 0.0,0.0,0.0, 0.0,1.0,0.0);
 
-	} // resizeGL()
+	}
 
-// Objects
+// Objects to draw
 void SolarSystemWidget::drawSun() {
   glBindTexture(GL_TEXTURE_2D, this->textures[1]);
   gluQuadricDrawStyle(this->sun, GLU_FILL);
@@ -208,10 +203,12 @@ void SolarSystemWidget::drawSatelliteBody() {
   glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
   glMaterialf(GL_FRONT, GL_SHININESS, shininess*128);
 
+  // The main cylinder of the satellite
   gluQuadricDrawStyle(this->satellite, GLU_FILL);
   gluCylinder(this->satellite,0.2,0.2,0.6,10,10);
+
   glPopAttrib();
-  // Close the cylinder with disks
+  // Close the cylinder with disks, texture with branding
   glBindTexture(GL_TEXTURE_2D, this->textures[6]);
   gluQuadricDrawStyle(this->satelliteEnd, GLU_FILL);
   gluQuadricTexture(this->satelliteEnd, GL_TRUE);
@@ -223,7 +220,8 @@ void SolarSystemWidget::drawSatelliteBody() {
     glRotatef(180,1,0,0);
     gluDisk(this->satelliteEnd,0,0.2,10,1);
   glPopMatrix();
-  // Add the joints
+
+  // Add the joints and the solar panels
   glPushAttrib(GL_LIGHTING_BIT);
   glPushMatrix();
     glRotatef(90,0,1,0);
@@ -238,7 +236,7 @@ void SolarSystemWidget::drawSatelliteBody() {
 
     glTranslatef(0,0,-0.5);
     gluCylinder(this->joint[1],0.05,0.05,0.1,5,5);
-    // First solar panel
+    // Second solar panel
     glPushMatrix();
     glRotatef(this->solarPanelAngle[1],0,0,1);
     glTranslatef(0,0,-0.5);
@@ -252,20 +250,21 @@ void SolarSystemWidget::drawSolarPanel() {
   // Normals
   GLfloat normals[6][3] = { {1., 0. ,0.}, {-1., 0., 0.}, {0., 0., 1.}, {0., 0., -1.}, {0, 1, 0}, {0, -1, 0} };
 
+  // Thin, rectangular solar panels
   glNormal3fv(normals[0]);
   glBegin(GL_POLYGON);
-    glVertex3f( 0.1, -0.01,  0.5);
-    glVertex3f( 0.1, -0.01, 0);
-    glVertex3f( 0.1,  0.01, 0);
-    glVertex3f( 0.1,  0.01,  0.5);
+    glVertex3f(0.1, -0.01, 0.5);
+    glVertex3f(0.1, -0.01, 0);
+    glVertex3f(0.1,  0.01, 0);
+    glVertex3f(0.1,  0.01, 0.5);
   glEnd();
 
   glNormal3fv(normals[1]);
   glBegin(GL_POLYGON);
-    glVertex3f( -0.1, -0.01,  0.5);
-    glVertex3f( -0.1, -0.01, 0);
-    glVertex3f( -0.1,  0.01, 0);
-    glVertex3f( -0.1,  0.01,  0.5);
+    glVertex3f(-0.1, -0.01, 0.5);
+    glVertex3f(-0.1, -0.01, 0);
+    glVertex3f(-0.1,  0.01, 0);
+    glVertex3f(-0.1,  0.01, 0.5);
   glEnd();
 
   glNormal3fv(normals[2]);
@@ -286,18 +285,18 @@ void SolarSystemWidget::drawSolarPanel() {
 
   glNormal3fv(normals[4]);
   glBegin(GL_POLYGON);
-    glVertex3f(  0.1,  0.01,  0.5);
-    glVertex3f(  0.1,  0.01, 0);
-    glVertex3f( -0.1,  0.01, 0);
-    glVertex3f( -0.1,  0.01,  0.5);
+    glVertex3f( 0.1, 0.01, 0.5);
+    glVertex3f( 0.1, 0.01, 0);
+    glVertex3f(-0.1, 0.01, 0);
+    glVertex3f(-0.1, 0.01, 0.5);
   glEnd();
 
   glNormal3fv(normals[5]);
   glBegin(GL_POLYGON);
-    glVertex3f(  0.1,  -0.01,  0.5);
-    glVertex3f(  0.1,  -0.01, 0);
-    glVertex3f( -0.1,  -0.01, 0);
-    glVertex3f( -0.1,  -0.01,  0.5);
+    glVertex3f( 0.1, -0.01, 0.5);
+    glVertex3f( 0.1, -0.01, 0);
+    glVertex3f(-0.1, -0.01, 0);
+    glVertex3f(-0.1, -0.01, 0.5);
   glEnd();
 }
 
@@ -310,11 +309,11 @@ void SolarSystemWidget::drawJupiter() {
 
 // called every time the widget needs painting
 void SolarSystemWidget::paintGL()
-	{ // paintGL()
+	{
 	// clear the widget
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  // Background image of distant stars (static) -- texture inside of sphere??
+  // Background image of distant stars (static) -- texture inside of sphere and allow rotation??
   glMatrixMode(GL_PROJECTION);
   glPushMatrix();
     glBindTexture(GL_TEXTURE_2D, this->textures[0]);
@@ -322,6 +321,7 @@ void SolarSystemWidget::paintGL()
     glLoadIdentity();
     glOrtho(-16.0, 16.0, -16.0, 16.0, -16.0, 16.0);
     glDisable(GL_DEPTH_TEST);
+    // Simple plane to texture
     glBegin(GL_QUADS);
       glTexCoord2f(0,0);
       glVertex2f(-16,-16);
@@ -407,7 +407,7 @@ void SolarSystemWidget::paintGL()
 
   glPopMatrix();
 
-  // Set active texture to default
+  // Set active texture to default, necessary for all previous textures to work
   glActiveTexture(GL_TEXTURE0);
 
 	// flush to screen
@@ -434,7 +434,7 @@ void SolarSystemWidget::setzAngle(int newAngle)  {
 }
 
 void SolarSystemWidget::incrementAngle()  {
-  // Rotation of spheres on their axis, one in different direction
+  // Rotation of spheres on their axes, one in different direction
   this->sunAngle = sunAngle + 0.25;
   this->axisAngles[0] = axisAngles[0] + 0.5;
   this->axisAngles[1] = axisAngles[1] - 0.5;

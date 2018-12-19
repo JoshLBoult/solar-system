@@ -1,10 +1,9 @@
 #include "SolarSystemWindow.h"
 
-// constructor / destructor
+
 SolarSystemWindow::SolarSystemWindow(QWidget *parent)
 	: QWidget(parent)
-	{ // constructor
-
+	{
   // timers
   angleTimer = new QTimer(this);
   angleTimer->start(25);
@@ -49,16 +48,16 @@ SolarSystemWindow::SolarSystemWindow(QWidget *parent)
 
   // Create new layouts to hold sliders and labels
   xSliderLayout = new QBoxLayout(QBoxLayout::LeftToRight);
-  xLabel = new QLabel("X: ");
+  xLabel = new QLabel("X viewing angle: ");
     xSliderLayout->addWidget(xLabel);
     xSliderLayout->addWidget(x_angleSlider);
   ySliderLayout = new QBoxLayout(QBoxLayout::LeftToRight);
-  yLabel = new QLabel("Y: ");
+  yLabel = new QLabel("Y viewing angle: ");
     ySliderLayout->addWidget(yLabel);
     ySliderLayout->addWidget(y_angleSlider);
 
   zSliderLayout = new QBoxLayout(QBoxLayout::LeftToRight);
-  zLabel = new QLabel("Z: ");
+  zLabel = new QLabel("Z viewing angle: ");
     zSliderLayout->addWidget(zLabel);
     zSliderLayout->addWidget(z_angleSlider);
 
@@ -77,29 +76,26 @@ SolarSystemWindow::SolarSystemWindow(QWidget *parent)
   connect(speedSpinBox, SIGNAL(valueChanged(int)), systemWidget, SLOT(setSpeed(int)));
   connect(orbitSpinBox, SIGNAL(valueChanged(int)), systemWidget, SLOT(setDistance(int)));
 
-	} // constructor
+	}
 
 
 SolarSystemWindow::~SolarSystemWindow()
-	{ // destructor
+	{
   delete x_angleSlider;
   delete y_angleSlider;
   delete z_angleSlider;
+  delete speedSpinBox;
+  delete orbitSpinBox;
+  delete xLabel;
+  delete yLabel;
+  delete zLabel;
+  delete speedLabel;
+  delete orbitLabel;
+  delete angleTimer;
 	delete systemWidget;
+  delete xSliderLayout;
+  delete ySliderLayout;
+  delete zSliderLayout;
+  delete satelliteLayout;
 	delete windowLayout;
-	} // destructor
-
-// resets all the interface elements
-// void SolarSystemWindow::ResetInterface()
-// 	{ // ResetInterface()
-//
-//   y_angleSlider->setMinimum(0);
-//   y_angleSlider->setMaximum(360);
-//   y_angleSlider->setTickInterval(45);
-//   y_angleSlider->setValue(180);
-//
-//
-// 	// now force refresh
-// 	systemWidget->update();
-// 	update();
-// 	} // ResetInterface()
+	}

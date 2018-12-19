@@ -1,13 +1,10 @@
 #include <QApplication>
-#include <QVBoxLayout>
-#include <GL/glut.h>
 #include "SolarSystemWindow.h"
 
 int main(int argc, char *argv[])
-	{ // main()
+	{
 	// create the application
 	QApplication app(argc, argv);
-  glutInit(&argc, argv);
 
 	// create a master widget
   SolarSystemWindow *window = new SolarSystemWindow(NULL);
@@ -26,4 +23,4 @@ int main(int argc, char *argv[])
 
 	// return to caller
 	return 0;
-	} // main()
+	}
